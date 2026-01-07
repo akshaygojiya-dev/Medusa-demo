@@ -1,0 +1,88 @@
+import { defineWidgetConfig } from "@medusajs/admin-sdk";
+import { AdminProduct } from "@medusajs/framework/types";
+import { Container } from "@medusajs/ui";
+import { useEffect, useState } from "react";
+
+type Props = {
+  data: AdminProduct;
+};
+
+type RatingData = {
+  average: number;
+  total: number;
+};
+
+export default function ProductReviewBadgeWidget({ data }: Props) {
+  const [ratingData, setRatingData] = useState<RatingData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    // Safety check
+    if (!data?.id) {
+      setLoading(false);
+      setError(true);
+      return;
+    }
+
+    const fetchRating = async () => {
+      try {
+        const response = await fetch(`/admin/products/${data.id}/reviews?limit=1`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        setRatingData({
+          average: result.average_rating || 0,
+          total: result.total_ratings || 0,
+        });
+        setError(false);
+      } catch (err) {
+        console.error("Failed to fetch rating for product", data.id, err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRating();
+  }, [data?.id]);
+
+  // Don't render anything if there's an error - fail silently
+  if (error || loading) {
+    return null;
+  }
+
+  if (!ratingData || ratingData.total === 0) {
+    return null; // Don't show "No reviews yet" to avoid clutter
+  }
+
+  try {
+    const fullStars = Math.floor(ratingData.average);
+    const stars = "⭐".repeat(Math.min(fullStars, 5));
+
+    return (
+      <Container className="px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{stars}</span>
+          <div className="text-xs">
+            <span className="font-semibold">{ratingData.average.toFixed(1)}</span>
+            <span className="text-gray-500 ml-1">
+              ({ratingData.total})
+            </span>
+          </div>
+        </div>
+      </Container>
+    );
+  } catch (renderError) {
+    console.error("Error rendering rating badge", renderError);
+    return null;
+  }
+}
+
+export const config = defineWidgetConfig({
+  zone: "product.list.after",
+});
