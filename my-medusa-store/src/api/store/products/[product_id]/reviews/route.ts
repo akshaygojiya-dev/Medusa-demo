@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import ReviewModuleService from "../../../../../../../modules/review/service"
+import ReviewModuleService from "../../../../../modules/review/service"
 
 export async function POST(
   req: MedusaRequest,
@@ -49,7 +49,7 @@ export async function GET(
   const { limit = 10, offset = 0 } = req.query
 
   try {
-    const reviews = await reviewService.listReviews({
+    const result = await reviewService.listReviewsWithCount({
       product_id,
       status: "approved",
       limit: parseInt(limit as string),
@@ -57,8 +57,8 @@ export async function GET(
     })
 
     res.json({
-      reviews,
-      count: reviews.length,
+      reviews: result.reviews,
+      count: result.count,
       limit: parseInt(limit as string),
       offset: parseInt(offset as string),
     })

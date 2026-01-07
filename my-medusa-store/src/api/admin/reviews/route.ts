@@ -22,11 +22,11 @@ export async function GET(
       filters.product_id = product_id
     }
 
-    const reviews = await reviewService.listReviews(filters)
+    const result = await reviewService.listReviewsWithCount(filters)
 
     res.json({
-      reviews,
-      count: reviews.length,
+      reviews: result.reviews,
+      count: result.count,
       limit: parseInt(limit as string),
       offset: parseInt(offset as string),
     })

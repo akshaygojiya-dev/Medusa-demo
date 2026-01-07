@@ -38,20 +38,21 @@ export default class ReviewModuleService extends MedusaService({
     return review
   }
 
-  async listReviews(filters: FilterableReviewProps = {}) {
+  async listReviewsWithCount(filters: FilterableReviewProps = {}) {
+
     const { product_id, status, limit = 10, offset = 0 } = filters
 
     const where: any = {}
     if (product_id) where.product_id = product_id
     if (status) where.status = status
 
-    const reviews = await this.listReviews(where, {
+    const [reviews, count] = await super.listAndCountReviews(where, {
       skip: offset,
       take: limit,
-      orderBy: { created_at: "DESC" },
+      order: { created_at: "DESC" },
     })
 
-    return { reviews, count: reviews.length }
+    return { reviews, count }
   }
 
   async getReviewById(id: string) {
@@ -59,7 +60,7 @@ export default class ReviewModuleService extends MedusaService({
   }
 
   async getAverageRating(productId: string) {
-    const reviews = await this.listReviews({
+    const reviews = await super.listReviews({
       product_id: productId,
       status: "approved",
     })
@@ -101,8 +102,10 @@ export default class ReviewModuleService extends MedusaService({
   async checkRecentReviewsByIP(ip: string, minutes: number = 10) {
     const since = new Date(Date.now() - minutes * 60 * 1000)
 
-    const reviews = await this.listReviews({
+    const reviews = await super.listReviews({
       ip_address: ip,
+    }, {
+      take: null
     })
 
     return reviews.filter(review =>
