@@ -83,6 +83,7 @@ export default class ReviewModuleService extends MedusaService({
 
   async updateReviewStatus(id: string, status: "approved" | "rejected", adminId?: string) {
     const updateData: any = {
+      id,
       status,
     }
 
@@ -91,7 +92,7 @@ export default class ReviewModuleService extends MedusaService({
       updateData.approved_by = adminId
     }
 
-    const review = await this.updateReviews({ id }, updateData)
+    const [review] = await this.updateReviews([updateData])
     return review
   }
 

@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import ReviewModuleService from "../../../../../../modules/review/service"
+import ReviewModuleService from "../../../../modules/review/service"
 
 export async function DELETE(
   req: MedusaRequest,

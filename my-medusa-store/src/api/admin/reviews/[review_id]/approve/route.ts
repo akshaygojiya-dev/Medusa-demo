@@ -11,6 +11,7 @@ export async function POST(
   const adminId = "admin_user"
 
   try {
+    console.log(`Approving review ${review_id} by ${adminId}`)
     const review = await reviewService.updateReviewStatus(review_id, "approved", adminId)
 
     res.json({ review })
